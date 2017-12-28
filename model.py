@@ -8,23 +8,13 @@ class VideoPixelNetworkModel:
         self.config = config
 
         with tf.name_scope('inputs'):
-            self.sequences = tf.placeholder(tf.float32,
-                                            shape=[None, config.truncated_steps + 1] + config.input_shape,
-                                            name='sequences')
-            self.inference_prev_frame = tf.placeholder(tf.float32,
-                                                       shape=[None] + config.input_shape,
-                                                       name='inference_prev_frame')
-            self.inference_encoder_state = tf.placeholder(tf.float32,
-                                                          shape=[None, config.input_shape[0],
-                                                                 config.input_shape[1], config.conv_lstm_filters],
-                                                          name='inference_encoder_state')
-            self.inference_current_frame = tf.placeholder(tf.float32,
-                                                          shape=[None] + config.input_shape,
-                                                          name='inference_current_frame')
-            self.initial_lstm_state = tf.placeholder(tf.float32,
-                                                     shape=[2, None, config.input_shape[0],
-                                                            config.input_shape[1], config.conv_lstm_filters],
-                                                     name='initial_lstm_state')
+            x = config.input_shape[0]
+            y = config.input_shape[1]
+            self.sequences = tf.placeholder(tf.float32, shape=[None, config.truncated_steps + 1] + config.input_shape, name='sequences')
+            self.inference_prev_frame = tf.placeholder(tf.float32, shape=[None] + config.input_shape, name='inference_prev_frame')
+            self.inference_encoder_state = tf.placeholder(tf.float32, shape=[None, x, y, config.conv_lstm_filters], name='inference_encoder_state')
+            self.inference_current_frame = tf.placeholder(tf.float32, shape=[None] + config.input_shape, name='inference_current_frame')
+            self.initial_lstm_state = tf.placeholder(tf.float32, shape=[2, None, x, y, config.conv_lstm_filters], name='initial_lstm_state')
         self.build_model()
 
     def multiplicative_unit_without_mask(self, h, dilation_rate, scope):
@@ -305,7 +295,7 @@ class VideoPixelNetworkModel:
             self.output = tf.transpose(net_unwrap, [1, 0, 2, 3, 4])
 
             for i in range(self.config.truncated_steps):
-                Logger.summarize_images(tf.expand_dims(tf.cast(tf.arg_max(self.output[:, i], 3), tf.float32), 3),
+                Logger.summarize_images(tf.expand_dims(tf.cast(tf.argmax(self.output[:, i], 3), tf.float32), 3),
                                         'frame_{0}'.format(i), 'vpn', 1)
 
         with tf.name_scope('loss'):
@@ -325,7 +315,7 @@ class VideoPixelNetworkModel:
         with tf.name_scope('test_frames'):
             self.test_summaries = []
             for i in range(self.config.truncated_steps):
-                Logger.summarize_images(tf.expand_dims(tf.cast(tf.arg_max(self.inference_output, 3), tf.float32), 3),
+                Logger.summarize_images(tf.expand_dims(tf.cast(tf.argmax(self.inference_output, 3), tf.float32), 3),
                                         'test_frame_{0}'.format(i), 'vpn_test_{0}'.format(i), 1)
                 self.test_summaries.append(tf.summary.merge_all('vpn_test_{0}'.format(i)))
 

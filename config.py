@@ -16,17 +16,17 @@ class video_pixel_network_config:
     conv_lstm_filters = 256
 
     # Training config
-    epochs_num = 50000
-    iters_per_epoch = 450
+    epochs_num = 5
+    iters_per_epoch = 100
     truncated_steps = 9
     learning_rate = 3 * 1e-4
 
     # Data config
-    train_sequences_num = 7000
+    train_sequences_num = 9000
 
     # tensorflow config
     max_to_keep = 3
-    test_every = 100
+    test_every = 1000
 
 
 class mini_video_pixel_network_config:
@@ -78,13 +78,13 @@ class micro_video_pixel_network_config:
     conv_lstm_filters = 64
 
     # Training config
-    epochs_num = 50000
-    iters_per_epoch = 450
+    epochs_num = 100
+    iters_per_epoch = 10
     truncated_steps = 9
     learning_rate = 3 * 1e-4
 
     # Data config
-    train_sequences_num = 7000
+    train_sequences_num = 9000
 
     # tensorflow config
     max_to_keep = 3

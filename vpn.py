@@ -1,3 +1,4 @@
+import os
 import tensorflow as tf
 from config import *
 from model import VideoPixelNetworkModel
@@ -5,12 +6,14 @@ from data_generator import GenerateData
 from trainer import Trainer
 from logger import Logger
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+
 FLAGS = tf.app.flags.FLAGS
 tf.app.flags.DEFINE_string('vpn_arch', "", """ full, mini or micro """)
 tf.app.flags.DEFINE_boolean('train', True, """ train flag """)
 tf.app.flags.DEFINE_boolean('overfitting', True, """ overfitting flag """)
-tf.app.flags.DEFINE_boolean('load', True, """ model loading flag """)
-tf.app.flags.DEFINE_integer('batch_size', 16, """ batch size for training """)
+tf.app.flags.DEFINE_boolean('load', False, """ model loading flag """)
+tf.app.flags.DEFINE_integer('batch_size', 1, """ batch size for training """)
 tf.app.flags.DEFINE_string('data_dir', "/tmp/vpn/mnist_test_seq.npy", """ data directory """)
 tf.app.flags.DEFINE_string('exp_dir', "/tmp/vpn/", """ experiment directory """)
 
@@ -51,16 +54,17 @@ def main(_):
         config.summary_dir = FLAGS.exp_dir + FLAGS.vpn_arch + '/'
         config.checkpoint_dir = config.summary_dir + 'checkpoints/'
 
-    Logger.info('Starting building the model...')
+    Logger.info(' Loading Video Pixel Network...')
     vpn = VideoPixelNetworkModel(config)
-    data_generator = GenerateData(config)
-    trainer = Trainer(sess, vpn, data_generator, config)
-    Logger.info('Finished building the model')
 
+    Logger.info(' Loading data generator...')
+    data_generator = GenerateData(config)
+ 
+    Logger.info(' Initializing trainer...')
+    trainer = Trainer(sess, vpn, data_generator, config)
+ 
     if config.train:
         trainer.train()
-    trainer.test()
-
 
 if __name__ == '__main__':
     tf.app.run()
